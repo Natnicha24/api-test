@@ -832,6 +832,86 @@ app.post("/showemploydata", async (req, res) => {
     res.send(result[0].employ_name + "," + result[0].employ_contact);
 })
 
+app.post("/editagenciescheck", async (req, res) => {
+    console.log("im in backend of editagenciescheck now");
+    var reason = "";
+    let sql = `UPDATE user SET username="${req.body.name}",agencies="${req.body.number}",agenciescheck="${req.body.status}",reason="${reason}" WHERE user_id="${req.body.id}"`;
+    let result = await queryDB(sql);
+
+    sql = `SELECT agenciescheck FROM user WHERE user_id = '${req.body.id}'`;
+    result = await queryDB(sql);
+    result = Object.assign({}, result);
+    console.log("" + result[0].agenciescheck);
+    res.json(result[0].agenciescheck);
+})
+
+
+app.post("/editprofile", async (req, res) => {
+    console.log("im in backend of editprofile now");
+    let sql = `UPDATE user SET username="${req.body.name}",phone="${req.body.phone}",address="${req.body.address}",mail="${req.body.mail}",password="${req.body.password}" WHERE user_id="${req.body.id}"`;
+    let result = await queryDB(sql);
+    console.log(result);
+    res.end("Record updated successfully");
+})
+
+app.post("/editprofileadmin", async (req, res) => {
+    console.log("im in backend of editprofileadmin now");
+    let sql = `UPDATE user SET username="${req.body.name}" ,mail="${req.body.mail}",password="${req.body.password}" WHERE user_id="${req.body.id}"`;
+    let result = await queryDB(sql);
+    console.log(result);
+    res.end("Record updated successfully");
+})
+
+app.post("/search", async (req, res) => {
+    // สมมติว่า searchTerm คือข้อความที่ผู้ใช้ป้อนเข้ามา
+    let searchTerm = req.body.searchtext;
+    let sql = `SELECT project_id, projectname, projectdetail,project_image FROM project WHERE object LIKE '%${searchTerm}%'`;
+
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+    console.log(result);
+    res.json(result);
+
+})
+
+app.post("/deleteproject", async (req, res) => {
+    console.log("delete");
+
+    let sql = `DELETE FROM giverdetail WHERE project_id = '${req.body.id}'`;
+    let result = await queryDB(sql);
+    sql = `DELETE FROM project WHERE project_id= '${req.body.id}'`;
+    result = await queryDB(sql);
+    console.log(result);
+    console.log("Record deleted project successfully");
+})
+
+// update data
+app.post("/updateDB", async (req, res) => {
+    let sql = `UPDATE ${tablename} SET giver_id=${req.body.giver_id},giver_name=${req.body.name},donate=${req.body.object},appointment=${req.body.address},giver_contact=${req.body.contact},appointdate=${req.body.date},approve=${req.body.status} WHERE giver_detail_id = '${req.body.giver_detail_id}'`;
+    let result = await queryDB(sql);
+    console.log(result);
+    res.end("Record updated successfully");
+})
+
+// delete data
+app.post("/deleteDB", async (req, res) => {
+    console.log("delete");
+    let sql = `DELETE FROM ${tablename} WHERE username = '${req.body.username}'`;
+    let result = await queryDB(sql);
+    console.log(result);
+    res.end("Record deleted successfully");
+})
+
+// show data
+app.get("/showDB", async (req, res) => {
+    // let sql = `SELECT * FROM ${tablename}`;
+    let sql = `SELECT id, username, password FROM ${tablename}`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+    console.log(result);
+    res.json(result);
+})
+
 
 
 app.listen(PORT,()=>{
