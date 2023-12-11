@@ -167,6 +167,181 @@ const updateImggiveredit = async (tablename, giver_detail_id, fileimg) => {
     console.log("finish");
 }
 
+app.post("/registerMySql", async (req, res) => {
+    console.log("im in backend of regis now")
+    //อย่างที่1สถานะประชาชน ให้บันทึกลงในตารางuser พร้อมบันทึกเลข userid ในตาราง giver และบันทึกdetail ใน giver detail
+    //อย่างที่2สถานะหน่วยงานให้ขึ้นแจ้งเตือนใส่เลขหน่วยงานและ
+    // let sql = `CREATE TABLE IF NOT EXISTS user(user_id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(255),password VARCHAR(20),phone VARCHAR(45),address VARCHAR(500),mail VARCHAR(45),citizen VARCHAR(45),agencies VARCHAR(45))`;
+    // let result = await queryDB(sql);
+
+    //ประชาชน
+    let username = req.body.username;
+    let phone = req.body.phone;
+    let address = req.body.address;
+    let mail = req.body.mail;
+    let status = req.body.status;
+    let password = req.body.password;
+    let confirmpassword = req.body.confirmpassword;
+    //เพิ่มตัวแปรเลขหน่วยงาน
+
+    // let obj = Object.keys(result);
+
+    console.log(status);
+    if (status == "ประชาชน") {
+        console.log("ประชาชน");
+        sql = `INSERT INTO user(username,phone,address,mail,citizen,agencies,password) VALUES ("${req.body.username}","${req.body.phone}","${req.body.address}","${req.body.mail}","1","0","${req.body.password}")`;
+        result = await queryDB(sql);
+        console.log("ประชาชนลงทะเบียนสำเร็จ");
+        res.send("0,");
+    }
+    else {
+        console.log("หน่วยงาน and im send 1 to frontend");
+        res.send("1," + username + "," + phone + "," + address + "," + mail + "," + password);
+    }
+})
+
+
+app.post("/registerAgencies", async (req, res) => {
+    console.log("im in backend of regisAgencies now")
+
+    // let sql = `CREATE TABLE IF NOT EXISTS user(user_id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(255),password VARCHAR(20),phone VARCHAR(45),address VARCHAR(500),mail VARCHAR(45),citizen VARCHAR(45),agencies VARCHAR(45))`;
+    // let result = await queryDB(sql);
+
+    let username = req.body.username;
+    let phone = req.body.phone;
+    let address = req.body.address;
+    let mail = req.body.mail;
+    let password = req.body.password;
+    let agencies_number = req.body.agencies_number;
+    let agenciescheck = "1";
+    //เพิ่มตัวแปรเลขหน่วยงาน
+
+    // let obj = Object.keys(result);
+
+    console.log("หน่วยงาน");
+    sql = `INSERT INTO user(username,phone,address,mail,citizen,agencies,password,agenciescheck) VALUES ("${username}","${phone}","${address}","${mail}","0","${agencies_number}","${password}","${agenciescheck}")`;
+    result = await queryDB(sql);
+    console.log("หน่วยงานลงทะเบียนสำเร็จ");
+    res.send();
+
+})
+
+
+app.post("/loginMySql", async (req, res) => {
+    console.log("Im im backend of login");
+    let sql = "SELECT mail,password FROM user";
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    let checkmail = false;
+    let checkpassword = false;
+
+    let obj = Object.keys(result);
+    for (var i = 0; i < obj.length; i++) {
+        console.log(i);
+        console.log(result[obj[i]].mail);
+
+        if (result[obj[i]].mail == req.body.mail) {
+            checkmail = true;
+            console.log("HI: " + result[obj[i]].mail);
+        }
+        if (checkmail) {
+            console.log("mail it true im going to check password");
+            if (result[obj[i]].password == req.body.password) {
+                checkpassword = true;
+                console.log(result[obj[i]].password)
+                break;
+            }
+            res.send("1," + "no");//password wrong
+            console.log("i send 1 case password wrong.");
+            break;
+        }
+    }
+    if (checkmail == false) {
+        console.log("im going to front with 0 case username wrong");
+        res.send("0," + "no");
+    }
+
+    if (checkmail && checkpassword) {
+
+        let sql = `SELECT user_id,username,citizen,agenciescheck FROM user WHERE mail='${req.body.mail}'`;
+        let result = await queryDB(sql);
+        result = Object.assign({}, result);
+        for (var i = 0; i < obj.length; i++) {
+            console.log(result[obj[i]]);
+        }
+
+        console.log("im going to front with 2 case all correct");
+        console.log("2," + result[0].user_id + "," + result[0].username + "," + req.body.mail + "," + req.body.password + "," + result[0].citizen + "," + result[0].agenciescheck);
+        res.send("2," + result[0].user_id + "," + result[0].username + "," + req.body.mail + "," + req.body.password + "," + result[0].citizen + "," + result[0].agenciescheck);
+        console.log("LoginComplete");
+    }
+})
+
+app.post("/ForgotPassword_addmail", async (req, res) => {
+    console.log("Im im backend of ForgotPassword_addmail");
+    let sql = "SELECT mail FROM user";
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    let mail_exist = false;
+    let obj = Object.keys(result);
+
+    for (var i = 0; i < obj.length; i++) {
+        console.log(i);
+        console.log(req.body.mail + "=" + result[obj[i]].mail);
+
+        if (result[obj[i]].mail == req.body.mail) {
+            mail_exist = true;
+            console.log("I found " + result[obj[i]].mail);
+            break;
+        }
+        else {
+            console.log("try next");
+        }
+    }
+    if (mail_exist == false) {
+        console.log("Im not found your mail");
+        console.log("I send 1");
+        res.send("1");
+    }
+    if (mail_exist) {
+        console.log("I send 0");
+        res.send("0");
+    }
+})
+
+app.post("/ForgotPassword_newpassword", async (req, res) => {
+    console.log("Im im backend of ForgotPassword_newpassword");
+    let sql = "SELECT mail,password FROM user";
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    // let mail_exist = false;
+    let obj = Object.keys(result);
+
+    if (req.body.password == req.body.confirmpassword) {
+        for (var i = 0; i < obj.length; i++) {
+            console.log(i);
+            console.log(result[obj[i]].mail);
+
+            if (result[obj[i]].mail == req.body.mail) {
+                console.log("I found " + result[obj[i]].mail);
+                console.log("I will change password for you");
+                sql = `UPDATE user SET password = '${req.body.password}' WHERE mail='${req.body.mail}'`;
+
+                result = await queryDB(sql);
+                console.log("เปลี่ยนรหัสสำเร็จ");
+                break;
+            }
+            else {
+                console.log("try next");
+            }
+        }
+        res.send();
+    }
+})
+
 app.listen(PORT,()=>{
     console.log(`API listening on PORT${PORT}`)
 })
