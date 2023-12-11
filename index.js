@@ -48,6 +48,24 @@ con.connect(err => {
     }
 })
 
+let tablename = "user";
+
+const queryDB = (sql) => {
+    return new Promise((resolve, reject) => {
+        // query method
+        con.query(sql, (err, result, fields) => {
+            if (err) reject(err);
+            else
+                resolve(result)
+        })
+    })
+}
+
+const storage = multer.memoryStorage(); // ใช้ memory storage แทน disk storage
+
+const upload = multer({ storage: storage });
+
+
 
 app.listen(PORT,()=>{
     console.log(`API listening on PORT${PORT}`)
