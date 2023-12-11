@@ -342,6 +342,210 @@ app.post("/ForgotPassword_newpassword", async (req, res) => {
     }
 })
 
+app.post("/getprofile", async (req, res) => {
+    console.log("Im im backend of Getprofile now");
+    let sql = `SELECT username,phone,address,mail,password FROM user WHERE user_id ="${req.body.id}"`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    res.send(result[0].username + "!" + result[0].phone + "!" + result[0].address + "!" + result[0].mail + "!" + result[0].password);
+
+})
+
+app.post("/getprofileadmin", async (req, res) => {
+    console.log("Im im backend of Getprofileadmin now");
+    let sql = `SELECT username,mail,password FROM user WHERE user_id ="${req.body.id}"`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    res.send(result[0].username + "!" + result[0].mail + "!" + result[0].password);
+
+})
+
+app.get("/showRecomended", async (req, res) => {
+    console.log("im in backend of showRecomended");
+    let sql = `SELECT project_id, projectname, projectdetail,project_image FROM project WHERE recomended = '1'`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    let obj = Object.keys(result);
+    for (var i = 0; i < obj.length; i++) {
+        console.log(result[obj[i]].project_id + result[obj[i]].projectname + result[obj[i]].projectdetail + result[obj[i]].project_image);
+    }
+    console.log("im going to front of list");
+    res.json(result);
+
+})
+
+app.get("/showNews", async (req, res) => {
+    console.log("im in backend of showNews");
+    let sql = `SELECT idnews, name, detail,img FROM news`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    // let obj = Object.keys(result);
+    // for (var i = 0; i < obj.length; i++) {
+    //     console.log(result[obj[i]].project_id + result[obj[i]].projectname + result[obj[i]].projectdetail + result[obj[i]].project_image);
+    // }
+    console.log("im going to front of list");
+    res.json(result);
+
+})
+
+app.post("/showNewsdetail", async (req, res) => {
+    console.log("im in backend of showNewsdetail");
+    let sql = `SELECT  name, detail,img FROM news WHERE idnews=${req.body.id}`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    // let obj = Object.keys(result);
+    // for (var i = 0; i < obj.length; i++) {
+    //     console.log(result[obj[i]].project_id + result[obj[i]].projectname + result[obj[i]].projectdetail + result[obj[i]].project_image);
+    // }
+    console.log("im going to front of list");
+    res.send(result[0].name+","+result[0].detail+","+result[0].img);
+
+})
+
+app.post("/showolddata", async (req, res) => {
+    console.log("im in backend of showoldData");
+    let sql = `SELECT giver_name, giver_contact, donate,giver_picture,appointment,appointdate FROM giverdetail WHERE giver_detail_id = "${req.body.giver_detail_id}"`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    let obj = Object.keys(result);
+
+    console.log(result[0].giver_name + result[0].giver_contact + result[0].donate + result[0].giver_picture + result[0].appointment + result[0].appointdate);
+
+    console.log("im going to front of edit");
+    res.send(result[0].giver_name + "!" + result[0].giver_contact + "!" + result[0].donate + "!" + result[0].giver_picture + "!" + result[0].appointment + "!" + result[0].appointdate);
+
+})
+
+app.get("/showallproject", async (req, res) => {
+    console.log("im in backend of showAllproject");
+    let sql = `SELECT project_id, projectname, projectdetail,project_image FROM project`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    let obj = Object.keys(result);
+    for (var i = 0; i < obj.length; i++) {
+        console.log(result[obj[i]].project_id + result[obj[i]].projectname + result[obj[i]].projectdetail + result[obj[i]].project_image);
+    }
+    console.log("im going to front of list");
+    res.json(result);
+
+})
+
+app.post("/showprogress", async (req, res) => {
+    console.log("im in backend of showProgress");
+    var finish = "เสร็จสิ้น"
+    let sql = `SELECT giver_detail_id, appointment, appointdate,approve,project_id,projectname,reason FROM giverdetail WHERE giver_id="${req.body.id}" AND approve !="${finish}" `;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    let obj = Object.keys(result);
+
+    for (var i = 0; i < obj.length; i++) {
+        console.log(result[obj[i]].giver_detail_id + result[obj[i]].appointment + result[obj[i]].appointdate + result[obj[i]].approve + result[obj[i]].projectname + result[obj[i]].reason);
+    }
+
+    console.log("im going to front of progresspage");
+    res.json(result);
+})
+
+app.post("/showagencies", async (req, res) => {
+    console.log("im in backend of showAgencies");
+    var finish = "เสร็จสิ้น"
+    let sql = `SELECT user_id, username, agencies,agenciescheck FROM user WHERE agenciescheck ="${req.body.status}" `;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    let obj = Object.keys(result);
+
+    // for (var i = 0; i < obj.length; i++) {
+    //     console.log(result[obj[i]].giver_detail_id + result[obj[i]].appointment + result[obj[i]].appointdate + result[obj[i]].approve + result[obj[i]].projectname + result[obj[i]].reason);
+    // }
+
+    console.log("im going to front of mainadmin");
+    res.json(result);
+})
+
+app.post("/showallagencies", async (req, res) => {
+    console.log("im in backend of showallAgencies");
+    console.log(req.body.status);
+    if (req.body.status == "ทั้งหมด") {
+        let sql = `SELECT user_id, username, agencies,agenciescheck,reason FROM user WHERE agenciescheck ="อนุมัติ" OR agenciescheck="0" `;
+        let result = await queryDB(sql);
+        result = Object.assign({}, result);
+
+        let obj = Object.keys(result);
+        res.json(result);
+
+    }
+    else if (req.body.status == "อนุมัติ" || req.body.status == "0") {
+        sql = `SELECT user_id, username, agencies,agenciescheck,reason FROM user WHERE agenciescheck ="${req.body.status}" `;
+        result = await queryDB(sql);
+        result = Object.assign({}, result);
+
+        obj = Object.keys(result);
+
+        console.log(result);
+        res.json(result);
+
+    }
+
+
+    // console.log("im going to front of history");
+    // res.json(result);
+})
+
+app.post("/showHistory", async (req, res) => {
+    console.log("im in backend of showHistory Project");
+    console.log(req.body.userid);
+    let sql = `SELECT history_id,giver_username, projectname,datefinish,appointment FROM history WHERE giver_id='${req.body.userid}'`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+    res.json(result);
+})
+
+app.post("/showprofileagencies", async (req, res) => {
+    console.log("im in backend of showprofileagencies Project");
+    let sql = `SELECT username,phone,address,mail,agenciescheck,reason FROM user WHERE user_id='${req.body.id}'`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+    console.log(result[0].username + "!" + result[0].phone + "!" + result[0].address + "!" + result[0].mail + "!" + result[0].agenciescheck + "!" + result[0].reason)
+    res.send(req.body.id + "!" + result[0].username + "!" + result[0].phone + "!" + result[0].address + "!" + result[0].mail + "!" + result[0].agenciescheck + "!" + result[0].reason);
+})
+
+app.post("/showprofileadmin", async (req, res) => {
+    console.log("im in backend of showprofileagencies Project");
+    let sql = `SELECT username,mail FROM user WHERE user_id='${req.body.id}'`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+    res.send(req.body.id + "!" + result[0].username + "!" + result[0].mail);
+})
+
+app.post("/showgiverdetail", async (req, res) => {
+    console.log("im in backend of Giverdetail");
+
+    let sql = `SELECT donate,giver_picture,appointment,appointdate FROM giverdetail WHERE giver_detail_id='${req.body.id}'`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+    console.log(result[0].donate + "!" + result[0].giver_picture + "!" + result[0].appointment + "!" + result[0].appointdate);
+    res.send(result[0].donate + "!" + result[0].giver_picture + "!" + result[0].appointment + "!" + result[0].appointdate);
+})
+
+app.post("/showallgiverdetail", async (req, res) => {
+    console.log("im in backend of Giverdetail");
+
+    let sql = `SELECT giver_name,giver_contact,donate,giver_picture,appointment,appointdate,reason FROM giverdetail WHERE giver_detail_id='${req.body.id}'`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+    console.log(result[0].giver_name + "!" + result[0].giver_contact + "!" + result[0].donate + "!" + result[0].giver_picture + "!" + result[0].appointment + "!" + result[0].appointdate + "!" + result[0].reason);
+    res.send(result[0].giver_name + "!" + result[0].giver_contact + "!" + result[0].donate + "!" + result[0].giver_picture + "!" + result[0].appointment + "!" + result[0].appointdate + "!" + result[0].reason);
+})
+
 app.listen(PORT,()=>{
     console.log(`API listening on PORT${PORT}`)
 })
