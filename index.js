@@ -546,6 +546,223 @@ app.post("/showallgiverdetail", async (req, res) => {
     res.send(result[0].giver_name + "!" + result[0].giver_contact + "!" + result[0].donate + "!" + result[0].giver_picture + "!" + result[0].appointment + "!" + result[0].appointdate + "!" + result[0].reason);
 })
 
+app.post("/saveproject", async (req, res) => {
+    console.log("im in backend of saveproject now");
+    // let sql = `CREATE TABLE IF NOT EXISTS project(project_id INT AUTO_INCREMENT PRIMARY KEY, projectname VARCHAR(200),projectdetail VARCHAR(200),object VARCHAR(200),project_image VARCHAR(5000),postoffice VARCHAR(200),agenciesplace VARCHAR(200),appointplace VARCHAR(200),contact VARCHAR(200),reccomended INT)`;
+    // let result = await queryDB(sql);
+
+    //ประชาชน
+
+    // let obj = Object.keys(result);
+
+    sql = `INSERT INTO project(projectname,projectdetail,object,postoffice,agenciesplace,appointplace,contact,agencies) VALUES ("${req.body.projectname}","${req.body.projectdetail}","${req.body.object}","${req.body.postoffice}","${req.body.agenciesplace}","${req.body.appointplace}","${req.body.contact}","${req.body.agencies}")`;
+    result = await queryDB(sql);
+    console.log("บันทึกโปรเจคสำเร็จ");
+
+    sql = `SELECT project_id FROM project WHERE projectname="${req.body.projectname}" AND projectdetail="${req.body.projectdetail}" AND object="${req.body.object}" AND postoffice="${req.body.postoffice}" AND agenciesplace="${req.body.agenciesplace}" AND appointplace="${req.body.appointplace}" AND contact="${req.body.contact}"`;
+
+    result = await queryDB(sql);
+    result = Object.assign({}, result);
+    console.log("" + result[0].project_id);
+    res.send("" + result[0].project_id);
+})
+
+app.post("/savegiverdetail", async (req, res) => {
+    console.log("im in backend of savegiverdetail now");
+    let result1
+    let sql1 = `SELECT projectname FROM project WHERE project_id="${req.body.agencies}"`;
+    result1 = await queryDB(sql1);
+    result1 = result1[0];
+    console.log(result1.projectname);
+
+    let sql = `INSERT INTO giverdetail(giver_id,giver_name,donate,appointment,giver_contact,project_id,appointdate,projectname,approve) VALUES ("${req.body.giver_id}","${req.body.name}","${req.body.object}","${req.body.address}","${req.body.contact}","${req.body.agencies}","${req.body.date}","${result1.projectname}","รอหน่วยงานยืนยัน")`;
+    let result = await queryDB(sql);
+    console.log("บันทึกการบริจาคสำเร็จ");
+
+    sql = `SELECT giver_detail_id FROM giverdetail WHERE giver_id="${req.body.giver_id}" AND giver_name="${req.body.name}" AND donate="${req.body.object}" AND appointment="${req.body.address}" AND giver_contact="${req.body.contact}" AND project_id="${req.body.agencies}" AND appointdate="${req.body.date}" AND projectname="${result1.projectname}"`;
+
+    result = await queryDB(sql);
+    result = Object.assign({}, result);
+    console.log("" + result[0].giver_detail_id);
+    res.send("" + result[0].giver_detail_id);
+})
+
+app.post("/showprojectdetail", async (req, res) => {
+    console.log("im in backend of showprojectdetail now");
+
+    var owner;
+    let sql1 = `SELECT agencies FROM project WHERE project_id=${req.body.id}`;//ไปเอา primarykey ของหน่วยงานมาก่อน
+    let result1 = await queryDB(sql1);
+    result1 = Object.assign({}, result1);
+    owner = result1[0].agencies;
+    console.log(owner);
+
+    sql1 = `SELECT username,address FROM user WHERE user_id=${owner}`;
+    result1 = await queryDB(sql1);
+    result1 = Object.assign({}, result1);
+
+    let sql = `SELECT projectname, projectdetail,object,project_image,postoffice,agenciesplace,appointplace,contact,agencies FROM project WHERE project_id=${req.body.id}`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    let obj = Object.keys(result);
+    let obj1 = Object.keys(result1);
+    res.send(result[obj].projectname + "!" + result[obj].projectdetail + "!" + result[obj].object + "!" + result[obj].project_image + "!" + result[obj].postoffice + "!" + result[obj].agenciesplace + "!" + result[obj].appointplace + "!" + result[obj].contact + "!" + result1[obj1].username + "!" + result1[obj1].address);
+
+    // res.json(result);
+})
+
+app.post("/showagenciesproject", async (req, res) => {
+    console.log("im in backend of showagenciesproject now");
+
+
+    let sql = `SELECT projectname, projectdetail,project_id FROM project WHERE agencies=${req.body.id}`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    let obj = Object.keys(result);
+
+    for (var i = 0; i < obj.length; i++) {
+        console.log(result[obj[i]]);
+    }
+
+    if (!result || Object.keys(result).length === 0) {
+        console.log("No data found");
+        res.json({ message: null });
+        return;
+    }
+
+    res.json(result);
+
+    // res.json(result);
+})
+
+app.post("/showgiverproject", async (req, res) => {
+    console.log("im in backend of showgiverproject now");
+
+
+    let sql = `SELECT giver_name, approve,giver_detail_id FROM giverdetail WHERE project_id=${req.body.id}`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    let obj = Object.keys(result);
+
+    for (var i = 0; i < obj.length; i++) {
+        console.log(result[obj[i]]);
+    }
+
+    if (!result || Object.keys(result).length === 0) {
+        console.log("No data found");
+        res.json({ message: null });
+        return;
+    }
+
+    res.json(result);
+
+    // res.json(result);
+})
+
+app.post("/deletecanclegiver", async (req, res) => {
+    console.log("delete");
+    let sql = `DELETE FROM giverdetail WHERE giver_detail_id = '${req.body.id}'`;
+    let result = await queryDB(sql);
+    console.log(result);
+    res.end("Record deleted successfully");
+})
+
+app.post("/finish", async (req, res) => {
+    console.log("delete");
+
+    const selectSql = `SELECT giver_id,giver_name, projectname, appointdate FROM giverdetail WHERE giver_detail_id="${req.body.id}"`;
+    const selectResult = await queryDB(selectSql);
+    console.log(selectResult);
+
+    const giverID = selectResult[0].giver_id;
+    const giverName = selectResult[0].giver_name;
+    const projectName = selectResult[0].projectname;
+    const appointDate = selectResult[0].appointdate;
+    const currentDate = new Date();
+
+    const day = currentDate.getDate();
+    const month = currentDate.getMonth() + 1;
+    const year = currentDate.getFullYear();
+
+    // จัดรูปแบบใหม่
+    const datefinish = `${day}/${month}/${year}`;
+
+    // ทำ UPDATE โดยใช้ค่าที่ได้จาก SELECT
+    let sql = `INSERT INTO history (giver_id,giver_username,projectname,datefinish,appointment) VALUES ("${giverID}","${giverName}","${projectName}","${datefinish}","${appointDate}")`;
+    result = await queryDB(sql);
+
+    var finish = "เสร็จสิ้น"
+    sql = `UPDATE giverdetail SET approve="${finish}" WHERE giver_detail_id=${req.body.id}`
+    result = await queryDB(sql);
+
+
+    res.end("Update history okk successfully");
+})
+
+app.post("/deleteuseragencies", async (req, res) => {
+    console.log("delete");
+    let sqlSelect = `SELECT project_id FROM project WHERE agencies="${req.body.id}"`;
+    let resultSelect = await queryDB(sqlSelect);
+
+    // Check if resultSelect is an array and has elements
+    if (Array.isArray(resultSelect) && resultSelect.length > 0) {
+        for (var i = 0; i < resultSelect.length; i++) {
+            let sqlDelete = `DELETE FROM giverdetail WHERE project_id = '${resultSelect[i].project_id}'`;
+            let resultDelete = await queryDB(sqlDelete);
+            console.log(resultDelete);
+        }
+    } else {
+        console.log('No projects found for the given agencies');
+    }
+
+
+    sql = `DELETE FROM project WHERE agencies = '${req.body.id}'`;
+    result = await queryDB(sql);
+    console.log(result);
+
+    sql = `DELETE FROM user WHERE user_id = '${req.body.id}'`;
+    result = await queryDB(sql);
+    console.log(result);
+
+
+
+    res.end("Record deleted successfully");
+})
+
+app.post("/deleteuser", async (req, res) => {
+    console.log("delete");
+
+
+    sql = `DELETE FROM giverdetail WHERE giver_id = '${req.body.id}'`;
+    result = await queryDB(sql);
+    console.log(result);
+
+    sql = `DELETE FROM user WHERE user_id = '${req.body.id}'`;
+    result = await queryDB(sql);
+    console.log(result);
+
+
+
+    res.end("Record deleted successfully");
+})
+
+app.get("/showData", async (req, res) => {
+    console.log("im in backend of showData Project");
+    let sql = `SELECT id,img, projectname, projectdetail FROM project`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+
+    let obj = Object.keys(result);
+    for (var i = 0; i < obj.length; i++) {
+        console.log(result[obj[i]].img + result[obj[i]].projectname + result[obj[i]].projectdetail);
+    }
+    res.json(result);
+})
+
+
 app.listen(PORT,()=>{
     console.log(`API listening on PORT${PORT}`)
 })
