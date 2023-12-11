@@ -762,6 +762,77 @@ app.get("/showData", async (req, res) => {
     res.json(result);
 })
 
+app.post("/SaveHistory", async (req, res) => {
+    // let sql = `CREATE TABLE IF NOT EXISTS History (id INT AUTO_INCREMENT PRIMARY KEY, time TIMESTAMP default CURRENT_TIMESTAMP, username VARCHAR(255),products VARCHAR(255),price VARCHAR(100))`;
+    // let result = queryDB(sql);
+
+    sql = `INSERT INTO history (username,products, price) VALUES ("${req.body.username}","${req.body.products}","${req.body.price}")`;
+    result = queryDB(sql)
+    console.log("Save");
+    res.send("Save");
+})
+
+app.post("/gethistory", async (req, res) => {
+    // let sql = `SELECT * FROM ${tablename}`;
+    let sql = `SELECT products,price FROM history WHERE username = '${req.body.username}'`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+    res.json(result);
+    JSON.stringify(result);
+    console.log(result);
+})
+
+app.post("/updategiverdetail", async (req, res) => {
+    console.log("im in backend of updategiverdetail now");
+    let sql = `UPDATE giverdetail SET giver_id="${req.body.giver_id}",giver_name="${req.body.name}",donate="${req.body.object}",appointment="${req.body.address}",giver_contact="${req.body.contact}",appointdate="${req.body.date}",approve="${req.body.status}",reason="" WHERE giver_detail_id = '${req.body.giver_detail_id}'`;
+    let result = await queryDB(sql);
+    console.log(result);
+    res.end("Record updated successfully");
+})
+
+app.post("/addreason", async (req, res) => {
+    console.log("im in backend of Reason now");
+    var status = "หน่วยงานปฏิเสธ";
+    let sql = `UPDATE giverdetail SET reason="${req.body.reason}",approve="${status}" WHERE giver_detail_id = '${req.body.id}'`;
+    let result = await queryDB(sql);
+    console.log(result);
+    res.end("Record updated successfully");
+})
+
+app.post("/updateagenciescheck", async (req, res) => {
+    console.log("im in backend of updateagenciescheck now");
+
+    let sql = `UPDATE user SET reason="${req.body.reason}",agenciescheck="${req.body.status}" WHERE  user_id = '${req.body.user_id}'`;
+    let result = await queryDB(sql);
+    console.log(result);
+    res.end("Record updated successfully");
+})
+
+
+app.post("/employdata", async (req, res) => {
+    console.log("im in backend of Employdata now");
+    var approve = "หน่วยงานตอบรับ"
+    let sql = `UPDATE giverdetail SET employ_name="${req.body.employname}",employ_contact="${req.body.employ_contact}",approve="${approve}" WHERE giver_detail_id="${req.body.id}"`;
+    let result = await queryDB(sql);
+
+    console.log("Record updated successfully");
+
+    sql = `SELECT employ_name,employ_contact FROM giverdetail WHERE giver_detail_id = '${req.body.id}'`;
+    result = await queryDB(sql);
+    result = Object.assign({}, result);
+    res.send(result[0].employ_name + "," + result[0].employ_contact);
+})
+
+app.post("/showemploydata", async (req, res) => {
+    console.log("im in backend of showEmploydata now");
+
+    let sql = `SELECT employ_name,employ_contact FROM giverdetail WHERE giver_detail_id = '${req.body.id}'`;
+    let result = await queryDB(sql);
+    result = Object.assign({}, result);
+    res.send(result[0].employ_name + "," + result[0].employ_contact);
+})
+
+
 
 app.listen(PORT,()=>{
     console.log(`API listening on PORT${PORT}`)
