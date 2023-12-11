@@ -35,6 +35,10 @@ const con = mysql.createConnection({
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
+
+    ssl: {
+        rejectUnauthorized: false, // ในบางกรณี, คุณอาจจะต้องตั้งค่าเป็น true หรือตั้งค่า SSL certificate
+      },
   });
 
 con.connect(err => {
