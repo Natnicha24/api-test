@@ -99,6 +99,73 @@ const updateImg = async (tablename, project_id, fileimg) => {
     console.log("finish");
 }
 
+app.post('/saveimagegiver', upload.single('file'), async (req, res) => {
+    console.log("I'm in the backend of saveimagegiver now");
+
+    const imageBuffer = req.file.buffer; // ดึงข้อมูลไฟล์จาก buffer
+    try {
+        const result = cloudinary.uploader.upload_stream({ resource_type: 'auto' }, (error, result) => {
+            if (error) {
+                console.error(error);
+                res.status(500).json({ error: 'เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ' });
+            } else {
+                console.log('Image uploaded successfully:', result.secure_url);
+                const file = result.secure_url;
+                // ทำสิ่งที่คุณต้องการกับ URL ของไฟล์ที่อัพโหลด
+                updateImggiver('giverdetail', req.body.giver_detail_id, file).then(() => {
+                    console.log("HI");
+                    res.send("file:" + file);
+                });
+            }
+        }).end(imageBuffer);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ' });
+    }
+});
+const updateImggiver = async (tablename, giver_detail_id, fileimg) => {
+    console.log("--------------------------");
+    console.log("updateimg");
+    console.log("id" + giver_detail_id);
+    console.log("file" + fileimg);
+    let sql = `UPDATE ${tablename} SET giver_picture='${fileimg}' WHERE giver_detail_id='${giver_detail_id}'`
+    let result = await queryDB(sql);
+    console.log("finish");
+}
+
+app.post('/updateimagegiver', upload.single('file'), async (req, res) => {
+    console.log("I'm in the backend of updateimagegiver now");
+
+    const imageBuffer = req.file.buffer; // ดึงข้อมูลไฟล์จาก buffer
+    try {
+        const result = cloudinary.uploader.upload_stream({ resource_type: 'auto' }, (error, result) => {
+            if (error) {
+                console.error(error);
+                res.status(500).json({ error: 'เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ' });
+            } else {
+                console.log('Image uploaded successfully:', result.secure_url);
+                const file = result.secure_url;
+                // ทำสิ่งที่คุณต้องการกับ URL ของไฟล์ที่อัพโหลด
+                updateImggiveredit('giverdetail', req.body.giver_detail_id, file).then(() => {
+                    console.log("HI");
+                    res.send("file:" + file);
+                });
+            }
+        }).end(imageBuffer);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ' });
+    }
+});
+const updateImggiveredit = async (tablename, giver_detail_id, fileimg) => {
+    console.log("--------------------------");
+    console.log("updateimg");
+    console.log("id" + giver_detail_id);
+    console.log("file" + fileimg);
+    let sql = `UPDATE ${tablename} SET giver_picture='${fileimg}' WHERE giver_detail_id='${giver_detail_id}'`
+    let result = await queryDB(sql);
+    console.log("finish");
+}
 
 app.listen(PORT,()=>{
     console.log(`API listening on PORT${PORT}`)
