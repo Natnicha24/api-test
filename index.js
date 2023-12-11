@@ -65,6 +65,39 @@ const storage = multer.memoryStorage(); // ใช้ memory storage แทน di
 
 const upload = multer({ storage: storage });
 
+app.post('/saveimageproject', upload.single('file'), async (req, res) => {
+    console.log("I'm in the backend of saveimageproject now");
+
+    const imageBuffer = req.file.buffer; // ดึงข้อมูลไฟล์จาก buffer
+    try {
+        const result = cloudinary.uploader.upload_stream({ resource_type: 'auto' }, (error, result) => {
+            if (error) {
+                console.error(error);
+                res.status(500).json({ error: 'เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ' });
+            } else {
+                console.log('Image uploaded successfully:', result.secure_url);
+                const file = result.secure_url;
+                // ทำสิ่งที่คุณต้องการกับ URL ของไฟล์ที่อัพโหลด
+                updateImg('project', req.body.project_id, file).then(() => {
+                    console.log("HI");
+                    res.send("file:" + file);
+                });
+            }
+        }).end(imageBuffer);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ' });
+    }
+});
+const updateImg = async (tablename, project_id, fileimg) => {
+    console.log("--------------------------");
+    console.log("updateimg");
+    console.log("id" + project_id);
+    console.log("file" + fileimg);
+    let sql = `UPDATE ${tablename} SET project_image='${fileimg}' WHERE project_id='${project_id}'`
+    let result = await queryDB(sql);
+    console.log("finish");
+}
 
 
 app.listen(PORT,()=>{
